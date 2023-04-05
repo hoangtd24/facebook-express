@@ -8,6 +8,16 @@ const Code = require("../models/Code");
 const generateCode = require("../helpers/generateCode");
 const Post = require("../models/Post");
 const { default: mongoose } = require("mongoose");
+const { OAuth2Client } = require("google-auth-library");
+const nodemailer = require("nodemailer");
+
+const myOAuth2Client = new OAuth2Client(
+  process.env.MAILING_ID,
+  process.env.MAILING_SECRET
+);
+myOAuth2Client.setCredentials({
+  refresh_token: process.env.MAILING_REFRESH,
+});
 exports.register = async (req, res) => {
   try {
     const {
@@ -165,15 +175,16 @@ exports.findUser = async (req, res) => {
 exports.sendResetPasswordCode = async (req, res) => {
   try {
     const { email } = req.body;
-    const user = await User.findOne({ email });
+    const user = await User.findOne({email: email})
     await Code.findOneAndRemove({ user: user._id });
     const code = generateCode(6);
 
+    console.log(user)
     const saveCode = await new Code({
       code,
       user: user._id,
     }).save();
-    await sendResetCode(user.email, user.last_name, code);
+    await sendResetCode(email, user.name, code);
     return res.status(200).json({
       message: "Mã đã được gửi tới email của bạn",
     });

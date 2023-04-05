@@ -27,8 +27,8 @@ const connect = async () => {
 };
 connect();
 //route
-readdirSync("./routes").map((route) =>
-  app.use("/", require("./routes/" + route))
+readdirSync("./src/routes").map((route) =>
+  app.use("/", require("./src/routes/" + route))
 );
 
 const PORT = process.env.PORT || 8000;
